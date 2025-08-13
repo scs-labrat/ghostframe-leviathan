@@ -71,7 +71,7 @@ Follow these steps to deploy the GhostFrame CTF environment:
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/your-username/ghostframe-leviathan.git
+    git clone https://github.com/scs-labrat/ghostframe-leviathan.git
     cd ghostframe-leviathan
     ```
 
