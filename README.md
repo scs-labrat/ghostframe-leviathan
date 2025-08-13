@@ -7,7 +7,6 @@ Of course. Here is a comprehensive and professionally formatted `README.md` file
 ![License](https://img.shields.io/badge/License-MIT-blue.svg)![Type](https://img.shields.io/badge/CTF%20Type-Story--Driven%20%26%20Dynamic-purple.svg)![Platform](https://img.shields.io/badge/Platform-Docker%20%7C%20Debian-green.svg)![Status](https://img.shields.io/badge/Status-Ready%20for%20Deployment-brightgreen.svg)
 
 A dynamic, story-driven, multi-stage Capture The Flag (CTF) environment designed for immersive cybersecurity training.
-
 ---
 ### **Table of Contents**
 1.  [The Mission](#the-mission)
