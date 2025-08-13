@@ -83,7 +83,7 @@ Follow these steps to deploy the GhostFrame CTF environment:
 3.  **Run the Deployment Script:**
     Execute the master deployment script with `sudo`. It will handle all dependencies, user creation, Docker image builds, and container deployments.
     ```bash
-    sudo ./ghostframe_leviathan.sh
+    sudo ./enter_the_ghostframe.sh
     ```
     You will be prompted to type `leviathan` to confirm the high-risk installation.
 
