@@ -1,7 +1,3 @@
-Of course. Here is a comprehensive and professionally formatted `README.md` file suitable for the project's GitHub repository. It includes a catchy introduction, clear warnings, step-by-step instructions, and technical details to entice and inform potential users.
-
----
-
 # GHOSTFRAME: OPERATION LEVIATHAN
 
 ![License](https://img.shields.io/badge/License-MIT-blue.svg)![Type](https://img.shields.io/badge/CTF%20Type-Story--Driven%20%26%20Dynamic-purple.svg)![Platform](https://img.shields.io/badge/Platform-Docker%20%7C%20Debian-green.svg)![Status](https://img.shields.io/badge/Status-Ready%20for%20Deployment-brightgreen.svg)
