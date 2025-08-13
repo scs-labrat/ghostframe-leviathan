@@ -1,0 +1,8 @@
+flask>=2.0.0
+requests>=2.26.0
+passlib>=1.7.4
+websockets>=10.0
+curses>=2.2
+psutil>=5.8.0
+asyncio>=3.0
+telnetlib3>=1.0.4

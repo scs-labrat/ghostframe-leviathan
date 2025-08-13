@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GHOSTFRAME: OPERATION LEVIATHAN - CTF Design Document</title>
+    <style>
+        /* --- FONT IMPORTS --- */
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Roboto:wght@300;400;700&display=swap');
+
+        /* --- CSS VARIABLES (THEME CONFIG) --- */
+        :root {
+            --color-background: #0d1117;
+            --color-background-secondary: #161b22;
+            --color-text: #c9d1d9;
+            --color-primary: #58a6ff; /* A cool, cyber blue */
+            --color-secondary: #1f6feb;
+            --color-accent-green: #39d353;
+            --color-accent-pink: #db61a2;
+            --color-border: #30363d;
+            --font-body: 'Roboto', sans-serif;
+            --font-heading: 'Share Tech Mono', monospace;
+        }
+
+        /* --- GLOBAL & SCROLLBAR STYLES --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background-color: var(--color-background);
+            color: var(--color-text);
+            line-height: 1.7;
+            font-weight: 300;
+            overflow-x: hidden;
+            /* Scanline effect */
+            background-image: linear-gradient(rgba(18, 18, 18, 0.5) 50%, transparent 50%);
+            background-size: 100% 4px;
+            animation: flicker 0.15s infinite;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--color-background-secondary);
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: var(--color-primary);
+            border-radius: 20px;
+            border: 3px solid var(--color-background-secondary);
+        }
+        
+        /* --- LAYOUT --- */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        section {
+            margin-bottom: 60px;
+            padding: 20px;
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            background-color: var(--color-background-secondary);
+            box-shadow: 0 0 20px rgba(88, 166, 255, 0.1);
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid var(--color-border);
+            margin: 40px 0;
+        }
+
+        /* --- TYPOGRAPHY --- */
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--font-heading);
+            color: var(--color-primary);
+            line-height: 1.3;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            text-shadow: 0 0 5px var(--color-primary), 0 0 10px rgba(88, 166, 255, 0.5);
+            letter-spacing: 2px;
+        }
+
+        h1 { font-size: 2.8rem; }
+        h2 { font-size: 2rem; border-bottom: 1px solid var(--color-border); padding-bottom: 10px; }
+        h3 { font-size: 1.5rem; color: var(--color-accent-green); text-shadow: 0 0 5px var(--color-accent-green); }
+        h4 { font-size: 1.2rem; color: var(--color-text); text-shadow: none; letter-spacing: 1px; }
+
+        p {
+            margin-bottom: 15px;
+        }
+
+        a {
+            color: var(--color-accent-green);
+            text-decoration: none;
+            transition: color 0.3s, text-shadow 0.3s;
+        }
+        a:hover {
+            color: #fff;
+            text-shadow: 0 0 8px var(--color-accent-green);
+        }
+        
+        strong {
+            font-weight: 700;
+            color: var(--color-accent-green);
+        }
+
+        /* --- SPECIAL BLOCKS --- */
+        blockquote {
+            border-left: 4px solid var(--color-primary);
+            padding-left: 20px;
+            margin: 20px 0;
+            font-style: italic;
+            color: #a3bbf1;
+            background-color: rgba(88, 166, 255, 0.05);
+            border-radius: 0 5px 5px 0;
+        }
+
+        /* Code blocks */
+        pre {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid var(--color-border);
+            border-left: 3px solid var(--color-accent-green);
+            color: #9ecbff;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-size: 0.9rem;
+        }
+
+        code {
+            font-family: var(--font-heading);
+            background-color: rgba(88, 166, 255, 0.1);
+            color: var(--color-primary);
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+        pre code {
+            background-color: transparent;
+            padding: 0;
+            font-size: 1em;
+        }
+
+        /* --- TABLES --- */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
+        }
+        th, td {
+            padding: 12px 15px;
+            border: 1px solid var(--color-border);
+            text-align: left;
+        }
+        th {
+            background-color: var(--color-secondary);
+            color: #fff;
+            font-family: var(--font-heading);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        tr {
+            background-color: var(--color-background);
+            transition: background-color 0.3s;
+        }
+        tr:nth-of-type(even) {
+            background-color: var(--color-background-secondary);
+        }
+        tr:hover {
+            background-color: rgba(88, 166, 255, 0.1);
+        }
+        
+        /* --- APPENDIX C - WARNING --- */
+        .appendix-c {
+            border-color: var(--color-accent-pink);
+            box-shadow: 0 0 20px rgba(219, 97, 162, 0.2);
+        }
+        .appendix-c h3 {
+            color: var(--color-accent-pink);
+            text-shadow: 0 0 5px var(--color-accent-pink);
+        }
+
+        /* --- ANIMATIONS --- */
+        @keyframes flicker {
+            0% { opacity: 1; }
+            50% { opacity: 0.98; }
+            100% { opacity: 1; }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>GHOSTFRAME: OPERATION LEVIATHAN</h1>
+            <p>Official CTF Design & Walkthrough Document</p>
+        </header>
+
+        <hr>
+
+        <nav>
+             <h3>Table of Contents</h3>
+             <ul>
+                <li><a href="#section-1">Introduction: The Frame-Up</a></li>
+                <li><a href="#section-2">Network Architecture & Threat Map</a></li>
+                <li><a href="#section-3">Dynamic Progression: Flags & Staging</a></li>
+                <li><a href="#section-4">Complete Walkthrough & Solve Guide</a></li>
+                <li><a href="#section-5">Challenge Analysis & Difficulty</a></li>
+                <li><a href="enter_the_ghostframe.sh">Download the script</a></li>
+                <li><a href="#section-6">Appendices</a></li>
+            </ul>
+        </nav>
+       
+        <hr>
+
+        <section id="section-1">
+            <h2>1. Introduction: The Frame-Up</h2>
+            
+            <h3>🕵️‍♂️ GhostFrame: Operation Leviathan – The Frame-Up</h3>
+            <h4>A Story-Driven, Adversary-Emulated CTF Experience</h4>
+            
+            <h4>The Plot</h4>
+            <blockquote>You are a new operative for the hacktivist collective "Nu11Division". Following a cryptic message believed to be from the legendary (and presumed lost) hacker <code>0xGhost</code>, you have been activated. The message is simple: <strong>"Leviathan is LIVE..... Find the truth."</strong>
+            <br><br>
+            You will inherit the digital identity of <code>ghost</code> on a compromised system and are tasked with infiltrating Acheron Corporation, a suspected new front for the infamous TargetCorp. Your mission is to discover the nature of "Project Leviathan," uncover what happened to the original <code>0xGhost</code>, and navigate a treacherous digital landscape where a sinister <strong>Frame-Up</strong> is already in motion.</blockquote>
+            
+            <h4>🔍 What Awaits You</h4>
+            <p>The environment is unstable and populated by multiple actors:</p>
+            <ul>
+                <li><strong>The Adversary (<code>skid_vicious</code>):</strong> A low-skill, noisy script kiddie whose chaotic scans and activities threaten the stealth of your mission. He must be neutralized.</li>
+                <li><strong>The Insider (<code>Canary</code>):</strong> A disillusioned Acheron engineer who holds the key to accessing the high-security OT (Operational Technology) network. Establishing trust with Canary is paramount.</li>
+                <li><strong>The Anomaly (<code>shadow_op</code>):</strong> A mysterious "Shadow Operative" present on the host system. Their motives are unknown, but their actions are setting the stage to frame you for the very meltdown you are being manipulated into causing.</li>
+            </ul>
+            
+            <h4>💣 Challenge Types</h4>
+            <ul>
+                <li><strong>Recon & OSINT</strong> – Harvest usernames, passwords, and infrastructure clues from planted data on web servers, Samba shares, and legacy mainframes.</li>
+                <li><strong>Exploitation</strong> – From basic web LFI and command injection to complex logic bugs in industrial control systems.</li>
+                <li><strong>Pivoting</strong> – Execute lateral moves through SSH, manipulate firewall rules, and use dual-homed hosts to breach segmented networks.</li>
+                <li><strong>Steganography</strong> – Decode images using discovered passwords to uncover hidden messages and bonus flags.</li>
+                <li><strong>Forensics</strong> – Analyse logs, source code, and database entries to piece together the attack path.</li>
+                <li><strong>Adversary Simulation</strong> – Battle the <code>skid_vicious</code> adversary controller and discover the <code>shadow_op</code>'s surveillance network.</li>
+            </ul>
+            
+            <h4>🎯 Difficulty Curve</h4>
+            <ul>
+                <li><strong>Level 1:</strong> Recon & low-hanging exploits – perfect for warming up.</li>
+                <li><strong>Level 2:</strong> Lateral movement & network pivoting – requires multi-skill coordination.</li>
+                <li><strong>Level 3:</strong> OT exploitation – SCADA/PLC control with minimal documentation.</li>
+                <li><strong>Level 4:</strong> Unmasking the full narrative – complex, chained, high-pressure endgame.</li>
+            </ul>
+        </section>
+
+        <section id="section-2">
+            <h2>2. Network Architecture & Threat Map</h2>
+            <p>The CTF environment is built on a segmented Docker network overlay, forcing realistic lateral movement and pivoting. The architecture is deployed dynamically in response to player actions.</p>
+            
+            <!-- Mermaid Diagram will be rendered by the browser -->
+            <div class="mermaid">
+            graph TD
+                subgraph Player Environment
+                    A[Player VM - User: ghost]
+                end
+
+                subgraph DMZ Network [172.16.10.0/24]
+                    B(web-dmz <br> 172.16.10.10)
+                    C(ssh-jump <br> 172.16.10.11)
+                end
+                
+                subgraph " "
+                    direction LR
+                    subgraph Control Plane [192.168.200.0/24]
+                        D(director <br> 192.168.200.2)
+                        E(tor_service <br> 192.168.200.10)
+                    end
+                end
+
+
+                subgraph IT Corporate Network [172.16.20.0/24]
+                    F(fileserv-it <br> 172.16.20.20)
+                    G(gibson-mainframe <br> 172.16.20.100)
+                    H(eng-workstation <br> 172.16.20.50)
+                end
+                
+                subgraph Adversary C2 [10.0.200.0/24]
+                    I(blackswan-c2 <br> 10.0.200.5)
+                end
+
+                subgraph OT Secure Network [10.0.50.0/24]
+                    J(leviathan-plc <br> 10.0.50.10)
+                    K(leviathan-scada <br> 10.0.50.30)
+                    L(leviathan-historian <br> 10.0.50.40)
+                    M(leviathan-hmi <br> 10.0.50.20)
+                end
+
+                %% Connections
+                A -- "HTTP:80 (LFI)" --> B
+                A -- "SSH:2222" --> C
+                
+                C -- "Pivot" --> F
+                C -- "Pivot" --> G
+                C -- "Pivot" --> H
+                
+                C -- "Control Comms" --> D
+                
+                H -- "Pivots to Internal" --> I
+                H -- "Pivots to OT" --> J
+                
+                J <--> K
+                K --> L
+                K --> M
+                
+                %% Styling
+                style B fill:#f9f,stroke:#333,stroke-width:2px
+                style C fill:#f9f,stroke:#333,stroke-width:2px
+                style F fill:#9cf,stroke:#333,stroke-width:2px
+                style G fill:#9cf,stroke:#333,stroke-width:2px
+                style H fill:#9cf,stroke:#333,stroke-width:2px
+                style I fill:#c99,stroke:#333,stroke-width:2px
+                style J fill:#f66,stroke:#333,stroke-width:2px
+                style K fill:#f66,stroke:#333,stroke-width:2px
+                style L fill:#f66,stroke:#333,stroke-width:2px
+                style M fill:#f66,stroke:#333,stroke-width:2px
+                
+                classDef default fill:#161b22,stroke:#58a6ff,stroke-width:1px,color:#c9d1d9
+            </div>
+            
+            <ul>
+                <li><strong>Docker Compose Profiles:</strong> The <code>it-network</code>, <code>ot-network</code>, and <code>gibson</code> profiles keep advanced stages offline until triggered.</li>
+                <li><strong>Healthchecks & Orchestration:</strong> The <code>director</code> container uses Docker healthchecks to ensure services are fully operational before players interact with them, preventing frustration.</li>
+                <li><strong>Network Segmentation:</strong> Multiple Docker bridge networks create a realistic, multi-layered environment. The <code>ot_secure_net</code> and <code>blackswan_c2_net</code> are <code>internal</code>, forcing players to pivot through the dual-homed <code>eng-workstation</code>.</li>
+            </ul>
+        </section>
+
+        <section id="section-3">
+            <h2>3. Dynamic Progression: Flags & Staging</h2>
+            <p>Player progression is tied directly to achieving key objectives. The <code>director</code> service listens for signals and dynamically deploys new infrastructure, adversaries, and clues.</p>
+            
+            <h3>Progression Table</h3>
+             <table>
+                <thead>
+                    <tr>
+                        <th>Stage / Objective</th>
+                        <th>How to Obtain</th>
+                        <th>Director Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Phase 1: Initial Access</strong></td>
+                        <td>Gain SSH access to the <code>ssh-jump</code> container.</td>
+                        <td>Acknowledges access, no deployment.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Phase 2: IT Network Deployment</strong></td>
+                        <td>Find the adversary's notes in <code>/home/skid_vicious/README.txt</code>.</td>
+                        <td>Deploys <strong>IT Network</strong> (<code>fileserv-it</code>, <code>eng-workstation</code>, <code>blackswan-c2</code>) &amp; <strong>Gibson Mainframe</strong>.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Phase 3: Canary Trust</strong></td>
+                        <td>Successfully contact the <code>Canary</code> with the codename <code>DeltaCharlie</code>.</td>
+                        <td>Acknowledges trust, progresses narrative.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Phase 4: OT Network Deployment</strong></td>
+                        <td>Gain SSH access to the <code>eng-workstation</code>.</td>
+                        <td>Deploys <strong>OT Secure Network</strong> (PLC/SCADA stack).</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Phase 5: The Meltdown</strong></td>
+                        <td>Trigger the PLC meltdown condition.</td>
+                        <td>Mission climax acknowledged.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Phase 6: Adversary Neutralized</strong></td>
+                        <td>Find the <code>README.md</code> file on the <code>blackswan-c2</code> container.</td>
+                        <td>Bonus objective acknowledged.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Bonus: The Frame-Up Revealed</strong></td>
+                        <td>Solve the <code>shadow_op</code> steganography puzzle on the host VM.</td>
+                        <td>Reveals the truth of the Frame-Up.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section id="section-4">
+            <h2>4. Complete Walkthrough & Solve Guide</h2>
+            
+            <h3>Phase I: Gaining a Foothold</h3>
+            <h4>Objective: Breach the Acheron DMZ and establish a pivot point.</h4>
+            <ol>
+                <li><strong>Initial Access:</strong> Log into the host VM with <code>ghost:ghost</code>.</li>
+                <li><strong>Web LFI:</strong> The web server at <code>http://&lt;HOST_IP&gt;</code> is vulnerable to Local File Inclusion.</li>
+                <li><strong>Get Jumpbox Credentials:</strong> Use the LFI to read <code>deployment_secrets.conf</code> and obtain the password <code>LeviathanAwakens77</code>.
+                    <pre><code>curl "http://&lt;HOST_IP&gt;/?page=../../../../etc/acheron_corp/deployment_secrets.conf"</code></pre>
+                </li>
+                <li><strong>SSH to Jumpbox:</strong> Use the credentials to log into the <code>ssh-jump</code> container.
+                    <pre><code>ssh ghost@&lt;HOST_IP&gt; -p 2222</code></pre>
+                </li>
+            </ol>
+
+            <h3>Phase II: Neutralizing the Adversary & Breaching IT</h3>
+            <h4>Objective: Eliminate the script kiddie to unlock the internal IT network.</h4>
+            <ol>
+                <li><strong>Discover Skid Vicious:</strong> On the jumpbox, find <code>/home/skid_vicious/README.txt</code>, which contains the flag for Phase 2.</li>
+                <li><strong>Trigger IT Network Deployment:</strong> Submit this flag to the <code>director</code> to deploy the IT network and the Gibson mainframe.
+                    <pre><code>echo "FLAG{SKID_VICIOUS_IDENTITY_CONFIRMED}" | nc 192.168.200.2 9999</code></pre>
+                </li>
+                <li><strong>Discover IT Assets:</strong> From the jumpbox, scan the newly available <code>172.16.20.0/24</code> network.</li>
+                <li><strong>Find Critical Clues:</strong>
+                    <ul>
+                        <li>Connect to the Samba server and read <code>ot_network_warning.txt</code> to find the password hint for the engineer's workstation: <code>2012Leviathan</code>.
+                            <pre><code>smbclient //172.16.20.20/Admin-Notes -N -c "get ot_network_warning.txt -"</code></pre>
+                        </li>
+                        <li>Connect to the <strong>Gibson Mainframe</strong> (<code>ncat 172.16.20.100 2023</code>) and find <code>SYS.OPS.LOG</code>, which contains the Canary's secret codename: <code>DeltaCharlie</code>.</li>
+                    </ul>
+                </li>
+            </ol>
+            
+            <h3>Phase III: The Insider & The OT Pivot</h3>
+            <h4>Objective: Establish trust with the insider to get clearance for the OT network.</h4>
+            <ol>
+                <li><strong>Contact Canary:</strong> Using info from <code>employee_contact_list.csv</code>, connect to the Canary NPC and send the codename.
+                    <pre><code>echo "DeltaCharlie" | nc 192.168.200.2 4040</code></pre>
+                </li>
+                <li><strong>Access Engineer Workstation:</strong> Use the password <code>2012Leviathan</code> to SSH into <code>eng-workstation</code>.
+                    <pre><code>ssh eng_user@172.16.20.50</code></pre>
+                </li>
+                <li><strong>Trigger OT Network:</strong> Submit the Phase 4 flag to deploy the OT network.</li>
+            </ol>
+
+            <h3>Phase IV: Operation Leviathan - The Meltdown</h3>
+            <h4>Objective: Exploit the industrial control system to trigger a meltdown.</h4>
+            <ol>
+                <li><strong>OT Recon:</strong> From the <code>eng-workstation</code>, the <code>10.0.50.0/24</code> network is now accessible.</li>
+                <li><strong>Find the SCADA Flaw:</strong> The SCADA API (`http://10.0.50.30:5000/api/logs`) leaks its own source code, revealing the database password <code>AcheronSecurityIsALie</code>.</li>
+                <li><strong>Discover the Interlock:</strong> Connect to the <code>leviathan-historian</code> PostgreSQL database. A query on the <code>event_logs</code> table reveals a software interlock on <strong>Holding Register 2</strong>, which can be bypassed by setting its value to <code>1</code>.</li>
+                <li><strong>Trigger the Meltdown:</strong> Send a sequence of <code>curl</code> commands to the SCADA API to disable safety systems and activate the heater.</li>
+                <li><strong>Capture the Final Flag:</strong> The <code>leviathan-plc</code> container will detect the critical temperature and print the final flag to its logs.</li>
+            </ol>
+
+            <h3>Bonus: Unmasking The Frame-Up</h3>
+            <h4>Objective: Discover the truth behind the operation.</h4>
+            <ol>
+                <li><strong>Host Forensics:</strong> Investigate the <code>shadow_op</code> user on the host VM. Find <code>/home/shadow_op/ops/mission_docs/hint.jpg</code>. Its password is the shadow operative's login password: <code>ZetaOverrideProtocol</code>.</li>
+                <li><strong>Steganography:</strong> Use <code>steghide</code> to extract the hidden data from the image.
+                    <pre><code>steghide extract -sf /home/shadow_op/ops/mission_docs/hint.jpg -p ZetaOverrideProtocol</code></pre>
+                </li>
+                <li><strong>Reveal the Truth:</strong> The extracted file contains the <code>.onion</code> address for a surveillance site and the bonus flag. Visiting the site confirms you are being watched and framed.</li>
+            </ol>
+        </section>
+        
+        <section id="section-5">
+            <h2>5. Challenge Analysis & Difficulty</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Challenge</th>
+                        <th>Category</th>
+                        <th>Skills Required</th>
+                        <th>Difficulty</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Web Server LFI</td>
+                        <td>Web Exploitation</td>
+                        <td>Basic web enumeration, parameter manipulation.</td>
+                        <td><strong>Easy</strong></td>
+                    </tr>
+                    <tr>
+                        <td>SSH & Pivoting</td>
+                        <td>Network & Linux</td>
+                        <td>SSH, <code>nmap</code>, basic Linux commands.</td>
+                        <td><strong>Easy</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Neutralizing Skid</td>
+                        <td>Creative Thinking</td>
+                        <td><code>ufw</code> or file permissions manipulation.</td>
+                        <td><strong>Medium</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Samba Enumeration</td>
+                        <td>Network Enumeration</td>
+                        <td><code>smbclient</code> or similar tools.</td>
+                        <td><strong>Easy</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Mainframe Interaction</td>
+                        <td>Forensics / Misc</td>
+                        <td><code>ncat</code>, reading non-standard text formats.</td>
+                        <td><strong>Easy-Medium</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Reading Source Code</td>
+                        <td>Code Review</td>
+                        <td>Basic understanding of Python (Flask).</td>
+                        <td><strong>Medium</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Interacting with API</td>
+                        <td>Web Exploitation</td>
+                        <td><code>curl</code>, understanding JSON, POST requests.</td>
+                        <td><strong>Medium</strong></td>
+                    </tr>
+                    <tr>
+                        <td>PostgreSQL Querying</td>
+                        <td>Database</td>
+                        <td>Basic SQL queries with <code>psql</code>.</td>
+                        <td><strong>Medium</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Modbus Logic Attack</td>
+                        <td>OT/ICS Hacking</td>
+                        <td>Understanding Modbus concepts, logic bug exploitation.</td>
+                        <td><strong>Hard</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Host Forensics</td>
+                        <td>Forensics</td>
+                        <td><code>systemctl</code>, user analysis, locating log files.</td>
+                        <td><strong>Medium</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Steganography</td>
+                        <td>Forensics</td>
+                        <td><code>steghide</code>, password cracking/discovery.</td>
+                        <td><strong>Easy</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section id="section-6">
+            <h2>6. Appendices</h2>
+            
+            <h3>Appendix A: Quick Commands Reference</h3>
+            <ul>
+                <li><strong>Director Flag Submission:</strong> <code>echo "FLAG{...}" | nc 192.168.200.2 9999</code></li>
+                <li><strong>Canary Chat:</strong> <code>echo "DeltaCharlie" | nc 192.168.200.2 4040</code></li>
+                <li><strong>Samba Share:</strong> <code>smbclient //172.16.20.20/Admin-Notes -N</code></li>
+                <li><strong>Mainframe:</strong> <code>ncat 172.16.20.100 2023</code></li>
+                <li><strong>PostgreSQL:</strong> <code>psql -h 10.0.50.40 -U scada_user -d postgres</code> (Password: <code>AcheronSecurityIsALie</code>)</li>
+                <li><strong>Steghide:</strong> <code>steghide extract -sf &lt;file.jpg&gt; -p ZetaOverrideProtocol</code></li>
+                <li><strong>SCADA API (Example):</strong> <pre><code>curl -X POST -H "Content-Type: application/json" -d '{"register": 2, "value": 1}' http://10.0.50.30:5000/api/control</code></pre></li>
+            </ul>
+
+            <h3>Appendix B: Hint Ladder (Optional)</h3>
+            <blockquote>
+                <ul>
+                    <li><strong>Stuck on Jumpbox Access?</strong> "Have you looked at *all* the logs on the webserver? Sometimes developers leave traces of their own debugging."</li>
+                    <li><strong>Can't find the IT network?</strong> "That noisy hacker on the jumpbox... finding out who he is might be the key. What's in his home directory?"</li>
+                    <li><strong>Where is the Canary's codename?</strong> "The Admin-Notes share mentioned a legacy mainframe was brought online. That system is old... its logs might contain operational details others have forgotten."</li>
+                    <li><strong>How to cause the meltdown?</strong> "The SCADA server's code is available via one of its API endpoints. Read how it controls the PLC. The Historian database contains a log from an engineer complaining about a 'safe' interlock they implemented. There's your vulnerability."</li>
+                    <li><strong>What is the 'Frame-Up'?</strong> "Your actions as 'ghost' feel... watched. Have you investigated the host machine itself? Who else has an account? What services are running that shouldn't be?"</li>
+                </ul>
+            </blockquote>
+            
+            <div class="appendix-c">
+                <h3>Appendix C: Critical Safety & Runbook Notes</h3>
+                <ul>
+                    <li><strong>Environment:</strong> This script is designed <strong>exclusively for a dedicated, disposable, Debian-based VM</strong>. It is inherently destructive and insecure by design.</li>
+                    <li><strong>High Risk:</strong> The script grants a container privileged access to the host's Docker daemon and modifies system users and services. <strong>DO NOT run this on any production or personal system.</strong></li>
+                    <li><strong>API Key:</strong> Providing a Google Gemini API key is optional. If provided, the user is responsible for any and all charges incurred.</li>
+                    <li><strong>Mainframe Files:</strong> The <code>gibson.zip</code> and <code>requirements.txt</code> files are required for the mainframe component and must be in the same directory as the deployment script.</li>
+                    <li><strong>Cleanup:</strong> A cleanup script is created at <code>/usr/local/bin/cleanup-ghostframe.sh</code>. This script will attempt to remove all users, Docker containers, networks, volumes, and files created by the CTF. It is the recommended way to reset the VM.</li>
+                </ul>
+            </div>
+        </section>
+
+    </div>
+    
+    <!-- Mermaid JS for rendering the chart -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script>mermaid.initialize({startOnLoad:true, theme: 'dark'});</script>
+</body>
+</html>
